@@ -1,13 +1,15 @@
 
-var fs = require('fs');
+  var concat = require('stream').Transform();
+  concat.buffers = [];
 
-fs.readFile(process.argv[2], function(err, buf) {
-	start = 0;
-	for (var i = 0; i < buf.length; i++) {
-		if (buf[i] === 10) {
-			console.log(buf.slice(start, i))
-			start = i + 1;
-		}
-	}
-	console.log(buf.slice(start));
-});
+  concat._transform = function(buff, encoding, done) {
+    this.buffers.push(buff);
+    done();
+  };
+
+  concat._flush = function(done) {
+    console.log(Buffer.concat(this.buffers));
+    done();
+  };
+
+  process.stdin.pipe(concat)
